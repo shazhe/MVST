@@ -373,9 +373,12 @@ initFEbasis = function(p,t,M,K) {
   pars$t <- t
   pars$M <- M
   pars$K <- K
-  df <- data.frame(x = pars$p[,1],
-                   y = pars$p[,2],
-                   n = 1:nrow(p))
+  
+  if(dim(p)[2] < 3){
+     df <- data.frame(x = pars$p[,1],
+                      y = pars$p[,2],
+                      n = 1:nrow(p))
+     
   pars$vars <- df
   # Do tessellation
   Voronoi <- deldir(pars$p[,1],
@@ -391,6 +394,13 @@ initFEbasis = function(p,t,M,K) {
   pars$vars$area_tess_km2 = rep(0,nrow(p))
   for (i in 1:nrow(p)) {
     pars$vars$area_tess_km2[i] <- area.poly(pars$pol[[i]])
+  }
+  }else{
+      df <- data.frame(x = pars$p[,1],
+                       y = pars$p[,2],
+                       w = pars$p[,3],
+                       n = 1:nrow(p))
+      pars$vars <- df
   }
   this_basis <- new("FEBasis", pars=pars, n=nrow(p), fn=fn)
   return(this_basis)}
@@ -700,8 +710,8 @@ setMethod("initialize",signature(.Object = "linkGO"),  function(.Object,from=new
       Cmats <- vector("list",Tn)
       
       if(any(diff(to@df$t) < 0)) stop("Can only do link using data which is ordered temporally. Please order the data and redo.")
-      
       stopifnot(all(diff(to@df$t) >= 0))
+      
       for(i in seq_along(t_axis)) {
         to_sub <- to
         to_sub@df <- subset(to@df,t==t_axis[i]) # find data points at this time point
