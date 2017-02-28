@@ -455,6 +455,8 @@ setMethod(".find_inc_matrix",signature(basis = "FEBasis"), function(basis,obs,mu
 
 ## Find C matrix when observations are isolated points
 FindC <- function(p,tri,locs,method="R") {
+  ## p -- the vertex locations
+  ## tri -- triangulations, define the vertices of the triangle by identifying them as rows in p.
   if (length(locs[[1]]) > 0)  {
     t_num <- tsearch2(p[,1], p[,2], tri, locs[[1]], locs[[2]], bary = FALSE)
     z <- j_ind <- i_ind <- matrix(0,length(t_num),3)
@@ -568,16 +570,22 @@ FindC_polyaverage  <- function(p,tri,polygons,plotit=F,mulfun = 0,muldata=NULL,m
       z <- cbind(X$z1,X$z2,X$z3) 
     } else {
       for (j in 1:length(t_num))      {
-        A <- matrix(c(1,1,1,p[tris[t_num[j],1],1],p[tris[t_num[j],2],1],
-                      p[tris[t_num[j],3],1],p[tris[t_num[j],1],2],
-                      p[tris[t_num[j],2],2],p[tris[t_num[j],3],2]),3,3)
+        ## t_num[j] identify the triangle the j th grid point falls in
+        ## A: first column = 1, 2-3 contains the x, y coords of the vertex of the triangles
+        ## for 3d coords, A should be expend to be 3 by 4, with 2-4 cols for x,y,z coords
+        A <- matrix(c(1,1,1,
+                      p[tris[t_num[j],1],1],p[tris[t_num[j],2],1], p[tris[t_num[j],3],1],
+                      p[tris[t_num[j],1],2],p[tris[t_num[j],2],2], p[tris[t_num[j],3],2]),
+                    3,3)
         
         for (k in 1:3) {
           b <- matrix(0,3,1)
           b[k] <- 1
+          ## def prev: z <- j_ind <- i_ind <- matrix(0,length(t_num),3)
           i_ind[j,k] <- j
           j_ind[j,k] <- tris[t_num[j],k]
-          z[j,k] <- matrix(c(1,x[j],y[j]),1,3)%*%solve(A)%*%b
+          ## weight for interpolating the value at grid point from the triangle vertex
+          z[j,k] <- matrix(c(1,x[j],y[j]),1,3)%*%solve(A)%*%b 
           if (class(mulfun) == 'function') {
             
           }
@@ -610,6 +618,9 @@ FindC_EOF <- function(X,Obs,roundobs=1) { # Requires x,y and n (n to maintin ord
 
 ## Like FindC_boxaverage2 butfor arbitrary polygons
 FindC_average_EOF  <- function(X,polygons,mulfun=1)  {
+  ## x: coords and spatial process
+  ## polygons: a list of polygons
+  ## mulfun: weight used when taking the average
   n <- dim(X)[2] - 2
   m <- length(polygons)
   XY <- X[,1:2]
