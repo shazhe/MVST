@@ -592,6 +592,7 @@ FindC_polyaverage  <- function(p,tri,polygons,plotit=F,mulfun = 0,muldata=NULL,m
         }
       }   
     }
+    ## simplify? sparse matrix
     z <- z*mul_vals              
     Mmat <- sparseMatrix(as.vector(i_ind),as.vector(j_ind),x=as.vector(z),
                          dims = c(length(x),n))
