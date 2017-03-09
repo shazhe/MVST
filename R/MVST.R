@@ -18,7 +18,7 @@
 #' 
 #'
 #' @docType package
-#' @useDynLib MVST3D
+#' @useDynLib MVST
 #' @import ggplot2
 #' @import spam
 #' @import Matrix
@@ -39,7 +39,7 @@
 #' @importFrom fields rdist fields.rdist.near
 #' @importFrom actuar dinvgamma rinvgamma qinvgamma
 #' @importFrom igraph graph.adjacency graph.bfs
-#' @name MVST3D
+#' @name MVST
 NULL
 
 
