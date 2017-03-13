@@ -516,13 +516,24 @@ FindC_polyaverage  <- function(p,tri,polygons,plotit=F,mulfun = 0,muldata=NULL,m
   m <- length(polygons)
   C_j <- C_i <- C_z <- NULL
   
+  ## transform p to be LongLat if it is on spere
+  if(ncol(p) == 3){
+   p0 <- p
+   p <- do.call(cbind, Lxyz2ll(list(x = p[,1], y = p[,2], z = p[,3])))
+   }
+  
+  
   # Find radius to consider
-  max_tri_length <- max(apply(tri,1,function(x) max(rdist(p[x,],p[x,]))))
+  max_tri_lengths <- apply(tri,1,function(x) max(rdist(p0[x,],p0[x,])))
+  max_tri_id <- which(max_tri_lengths == max(max_tri_lengths))[1]
+  max_tri_length <- max(rdist(p[tri[max_tri_id,],], p[tri[max_tri_id,],]))
+  
   
   
   # For each box
-  cat("Constructing incidence matrix from supports ... ",sep="\n")
-  pb <- txtProgressBar(min = 0, max = m, style = 3)
+  #cat("Constructing incidence matrix from supports ... ",sep="\n")
+  #pb <- txtProgressBar(min = 0, max = m, style = 3)
+#ttt1 <- proc.time()
   for (i in 1:m) {
     # Creates fine grid
     pv <- poly_xy(polygons[i])
@@ -603,10 +614,12 @@ FindC_polyaverage  <- function(p,tri,polygons,plotit=F,mulfun = 0,muldata=NULL,m
     C_j <- c(C_j,not_zero)
     C_i <- c(C_i,rep(i,length(not_zero)))
     C_z <- c(C_z,Cm[not_zero])
-    setTxtProgressBar(pb, i)
+    #setTxtProgressBar(pb, i)
     
   }
   C <- sparseMatrix(C_i,C_j,x = C_z,dims = c(m,n))
+  #ttt2 <- proc.time()
+  #ttt2 - ttt1
   return(C)
 }
 
